@@ -319,9 +319,11 @@ select option { background: var(--navy-900); }
   position: relative; width: 1200px; height: 1600px; overflow: hidden;
   color: #fff;
   background:
-    radial-gradient(ellipse 80% 70% at 50% 46%, rgba(255, 255, 255, 0.05), transparent 70%),
-    radial-gradient(ellipse 120% 100% at 50% 50%, transparent 55%, rgba(2, 7, 28, 0.55) 100%),
-    #091547;
+    linear-gradient(158deg, rgba(255, 255, 255, 0.07) 0%, transparent 28%),
+    radial-gradient(ellipse 70% 32% at 50% 14%, rgba(72, 108, 230, 0.32), transparent 75%),
+    radial-gradient(ellipse 85% 55% at 50% 60%, rgba(38, 66, 178, 0.22), transparent 72%),
+    radial-gradient(ellipse 120% 100% at 50% 50%, transparent 50%, rgba(2, 6, 26, 0.72) 100%),
+    linear-gradient(180deg, #0b1a55 0%, #091547 40%, #071240 100%);
   font-family: "Cormorant Garamond", serif;
   font-variant-numeric: lining-nums;
   font-feature-settings: "lnum" 1;

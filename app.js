@@ -109,24 +109,47 @@
   // ---------------------------------------------------------------- svgs
   const GOLD = "#d9b866";
 
+  // Sixteen-point rosette: squares rotated in 22.5° steps, plus rings.
+  const ROSETTE = (() => {
+    let g = "";
+    for (let k = 0; k < 4; k++) {
+      g += `<rect x="-250" y="-250" width="500" height="500" transform="rotate(${k * 22.5})"/>`;
+      g += `<rect x="-160" y="-160" width="320" height="320" transform="rotate(${k * 22.5 + 11.25})"/>`;
+    }
+    for (let k = 0; k < 16; k++) g += `<path d="M0 -354L0 -440" transform="rotate(${k * 22.5})"/>`;
+    return `${g}<circle r="354"/><circle r="440"/><circle r="452"/><circle r="226"/><circle r="120"/>`;
+  })();
+
   const PATTERN_SVG = `
-    <svg class="f-pattern" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <svg class="f-pattern" viewBox="0 0 1200 1600" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <defs>
         <pattern id="girih" width="96" height="96" patternUnits="userSpaceOnUse">
-          <g fill="none" stroke="${GOLD}" stroke-opacity="0.12" stroke-width="1">
+          <g fill="none" stroke="${GOLD}" stroke-width="1">
             <rect x="28" y="28" width="40" height="40"/>
             <rect x="28" y="28" width="40" height="40" transform="rotate(45 48 48)"/>
             <circle cx="48" cy="48" r="9"/>
             <path d="M48 0V19.7M48 76.3V96M0 48H19.7M76.3 48H96M28 28L0 0M68 28L96 0M28 68L0 96M68 68L96 96"/>
           </g>
         </pattern>
-        <radialGradient id="fade" cx="50%" cy="50%" r="72%">
-          <stop offset="45%" stop-color="#fff" stop-opacity="0"/>
+        <radialGradient id="fade" cx="50%" cy="50%" r="70%">
+          <stop offset="0%" stop-color="#fff" stop-opacity="0.35"/>
+          <stop offset="55%" stop-color="#fff" stop-opacity="0.6"/>
           <stop offset="100%" stop-color="#fff" stop-opacity="1"/>
         </radialGradient>
-        <mask id="m"><rect width="100%" height="100%" fill="url(#fade)"/></mask>
+        <mask id="m"><rect width="1200" height="1600" fill="url(#fade)"/></mask>
+        <radialGradient id="rosFade" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
+          <stop offset="100%" stop-color="#fff" stop-opacity="0.2"/>
+        </radialGradient>
+        <mask id="rm"><rect x="-460" y="-460" width="920" height="920" fill="url(#rosFade)"/></mask>
+        <filter id="grain" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>
+          <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0"/>
+        </filter>
       </defs>
-      <rect width="100%" height="100%" fill="url(#girih)" mask="url(#m)"/>
+      <rect width="1200" height="1600" fill="url(#girih)" mask="url(#m)" opacity="0.16"/>
+      <g transform="translate(600 930)" fill="none" stroke="${GOLD}" stroke-width="1.3" opacity="0.10" mask="url(#rm)">${ROSETTE}</g>
+      <rect width="1200" height="1600" filter="url(#grain)" opacity="0.07"/>
     </svg>`;
 
   // Small eight-point star used at the frame corners and in dividers.
