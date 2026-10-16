@@ -52,8 +52,8 @@
           <label class="field"><span>To</span><input type="date" data-k="endDate" /></label>
         </div>
         <div class="hijri-line">
+          <span class="hl-label">Islamic month</span>
           <span id="hijriText"></span>
-          <button class="link" id="hijriChange">Change</button>
         </div>
       </section>
 
@@ -67,15 +67,19 @@
       </section>
 
       <details class="card more" id="more">
-        <summary class="card-head"><h2>More options</h2><span class="sub">Announcement, month, addresses, logos</span><span class="chev">▾</span></summary>
+        <summary class="card-head"><h2>More options</h2><span class="sub">Announcement, addresses, logos</span><span class="chev">▾</span></summary>
 
         <label class="field"><span>Announcement on the flyer <em>(optional)</em></span>
           <input type="text" data-k="note" placeholder="e.g. Daylight saving ends Nov 1st" />
         </label>
 
-        <div class="grid2 gap-top">
-          <label class="field"><span>Islamic month</span><select data-k="hijriMonth" id="hijriSelect"></select></label>
-          <label class="field"><span>Hijri year</span><input type="text" inputmode="numeric" data-k="hijriYear" /></label>
+        <div class="field gap-top">
+          <span>Islamic date adjustment <em>(only if the local moon sighting differs)</em></span>
+          <div class="seg">
+            <button type="button" data-adj="-1">−1 day</button>
+            <button type="button" data-adj="0">As calculated</button>
+            <button type="button" data-adj="1">+1 day</button>
+          </div>
         </div>
         <label class="field gap-top"><span>Custom date text <em>(replaces the From/To dates)</em></span>
           <input type="text" data-k="dateOverride" placeholder="e.g. Starting November 2nd" />

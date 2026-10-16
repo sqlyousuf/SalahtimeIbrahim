@@ -23,8 +23,7 @@
     startDate: "2026-10-15",
     endDate: "2026-10-31",
     dateOverride: "",
-    hijriMonth: 4,
-    hijriYear: "1448",
+    hijriAdjust: 0, // days to shift the calculated Islamic date (local moon sighting)
     loc1Name: "Masjid Ibrahim",
     loc2Name: "KIC Musalla",
     rows: [
@@ -195,7 +194,7 @@
 
   // ---------------------------------------------------------------- flyer render
   function renderFlyer() {
-    const month = HIJRI_MONTHS[state.hijriMonth] || HIJRI_MONTHS[0];
+    const hijri = hijriLabel();
     const date = dateLabel();
 
     const logo1 = state.logo1
@@ -237,7 +236,7 @@
           <div class="f-bigtitle f-fit">TIMINGS</div>
           ${rule("short")}
           <div class="f-dates f-fit">${date.html}</div>
-          <div class="f-hijri f-fit">${esc(month.en.toUpperCase())} &nbsp;·&nbsp; ${esc(state.hijriYear)} AH</div>
+          ${hijri ? `<div class="f-hijri f-fit">${esc(hijri.text.toUpperCase())}</div>` : ""}
         </div>
         <div class="f-kic">${logo2}</div>
       </div>
@@ -313,7 +312,11 @@
     if (sheetAt) markActive();
   }
 
-  function hijriFromDate(d) {
+  // Islamic month/year for a yyyy-mm-dd string, from the Umm al-Qura calendar.
+  function hijriFromDate(dateStr) {
+    const d = parseDate(dateStr);
+    if (!d) return null;
+    d.setDate(d.getDate() + (+state.hijriAdjust || 0));
     try {
       const parts = new Intl.DateTimeFormat("en-US-u-ca-islamic-umalqura", { month: "numeric", year: "numeric" }).formatToParts(d);
       return {
@@ -323,9 +326,25 @@
     } catch { return null; }
   }
 
+  // "Jumad ul Awwal · 1448 AH", or both months when the range crosses into the next one.
+  function hijriLabel() {
+    const a = hijriFromDate(state.startDate);
+    if (!a) return null;
+    const b = hijriFromDate(state.endDate) || a;
+    const ma = HIJRI_MONTHS[a.month], mb = HIJRI_MONTHS[b.month];
+    if (a.month === b.month && a.year === b.year) {
+      return { text: `${ma.en} · ${a.year} AH`, ar: ma.ar };
+    }
+    const years = a.year === b.year ? `${a.year} AH` : `${a.year} – ${b.year} AH`;
+    return { text: `${ma.en} – ${mb.en} · ${years}`, ar: `${ma.ar} – ${mb.ar}` };
+  }
+
   function renderHijriLine() {
-    const m = HIJRI_MONTHS[state.hijriMonth] || HIJRI_MONTHS[0];
-    $("#hijriText").innerHTML = `<b>${esc(m.en)} ${esc(state.hijriYear)}</b> <span dir="rtl">${m.ar}</span>`;
+    const h = hijriLabel();
+    $("#hijriText").innerHTML = h
+      ? `<b>${esc(h.text)}</b> <span dir="rtl">${h.ar}</span>`
+      : `<span class="muted">Pick a From date to set the Islamic month</span>`;
+    $$("[data-adj]").forEach((b) => b.classList.toggle("on", +b.dataset.adj === (+state.hijriAdjust || 0)));
   }
 
   function fillFields() {
@@ -450,32 +469,21 @@
   }
 
   function initEditor() {
-    $("#hijriSelect").innerHTML = HIJRI_MONTHS.map((m, i) => `<option value="${i}">${m.en} — ${m.ar}</option>`).join("");
-
     $("#editor").addEventListener("input", (e) => {
       const el = e.target;
       const k = el.dataset.k;
       if (!k) return;
-      state[k] = k === "hijriMonth" ? +el.value : el.value;
-      if (k === "startDate") {
-        const h = parseDate(state.startDate) && hijriFromDate(parseDate(state.startDate));
-        if (h) {
-          state.hijriMonth = h.month;
-          state.hijriYear = h.year;
-          $("#hijriSelect").value = h.month;
-          $('[data-k="hijriYear"]').value = h.year;
-        }
-      }
-      if (k === "startDate" || k === "hijriMonth" || k === "hijriYear") renderHijriLine();
+      state[k] = el.value;
+      if (k === "startDate" || k === "endDate") renderHijriLine();
       if (k === "loc1Name" || k === "loc2Name") renderRows();
       commit();
     });
 
-    $("#hijriChange").addEventListener("click", () => {
-      $("#more").open = true;
-      $("#hijriSelect").scrollIntoView({ block: "center", behavior: "smooth" });
-      setTimeout(() => $("#hijriSelect").focus(), 350);
-    });
+    $$("[data-adj]").forEach((b) => b.addEventListener("click", () => {
+      state.hijriAdjust = +b.dataset.adj;
+      renderHijriLine();
+      commit();
+    }));
 
     $("#rows").addEventListener("click", (e) => {
       const btn = e.target.closest("button");
