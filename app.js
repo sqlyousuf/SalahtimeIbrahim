@@ -210,8 +210,8 @@
       <div class="f-header">
         <div class="f-logo">${logo1}</div>
         <div class="f-title">
-          <div class="f-eyebrow">Salah Timings</div>
-          <div class="f-arabic f-fit">${month.ar}</div>
+          <div class="f-bigtitle f-fit">SALAH</div>
+          <div class="f-bigtitle f-fit">TIMINGS</div>
           ${rule("short")}
           <div class="f-dates f-fit">${date.html}</div>
           <div class="f-hijri f-fit">${esc(month.en.toUpperCase())} &nbsp;·&nbsp; ${esc(state.hijriYear)} AH</div>

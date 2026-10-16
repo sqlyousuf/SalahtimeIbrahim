@@ -263,7 +263,9 @@ select option { background: var(--navy-900); }
 
   .layout { grid-template-columns: minmax(0, 1fr); max-width: 640px; padding: 6px 14px calc(110px + var(--safe-b)); gap: 14px; }
   body.view-preview .layout { max-width: 1000px; }
-  body.view-edit .stage { display: none; }
+  /* parked off-screen, not display:none, so the flyer keeps its layout for
+     text fitting and background image rendering */
+  body.view-edit .stage { position: absolute; left: -20000px; top: 0; width: 600px; pointer-events: none; }
   body.view-preview .editor { display: none; }
   .stage { position: static; }
   .stage-label { display: none; }
@@ -360,13 +362,9 @@ select option { background: var(--navy-900); }
 
 .f-title { text-align: center; min-width: 0; }
 .f-fit { white-space: nowrap; overflow: hidden; }
-.f-eyebrow {
-  font-family: "Cinzel", serif; font-weight: 600; font-size: 15px; letter-spacing: 0.6em;
-  text-transform: uppercase; color: rgba(217, 184, 102, 0.85); padding-left: 0.6em;
-}
-.f-arabic {
-  font-family: "Aref Ruqaa", serif; font-weight: 700; font-size: 112px; line-height: 1.32;
-  direction: rtl; padding: 0 12px;
+.f-bigtitle {
+  font-family: "Cinzel", serif; font-weight: 700; font-size: 84px; line-height: 1.02;
+  letter-spacing: 0.06em; padding: 0 0 4px 0.06em;
   color: var(--g);
   background: linear-gradient(180deg, #fbe9b4 8%, #dcbb68 52%, #a77e2e 96%);
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
@@ -383,10 +381,10 @@ select option { background: var(--navy-900); }
 
 /* timetable */
 .f-table { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; padding: 58px 104px 0; }
-.f-cols, .f-row { display: grid; grid-template-columns: 1fr 1.1fr 1fr; align-items: center; text-align: center; }
+.f-cols, .f-row { display: grid; grid-template-columns: 1.15fr 0.9fr 1.15fr; align-items: center; text-align: center; }
 .f-cols {
-  font-family: "Cinzel", serif; font-weight: 600; font-size: 19px; letter-spacing: 0.32em; text-transform: uppercase;
-  color: var(--g); padding-bottom: 18px;
+  font-family: "Cinzel", serif; font-weight: 700; font-size: 31px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--g-hi); padding-bottom: 18px;
   border-bottom: 1px solid var(--g-line);
 }
 .f-rows { flex: 1; display: flex; flex-direction: column; }
