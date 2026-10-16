@@ -554,7 +554,7 @@
     const stage = frame.parentElement;
     const availW = stage.clientWidth;
     if (!availW) return;
-    const availH = window.innerWidth > 980 ? window.innerHeight - 150 : Infinity;
+    const availH = Math.max(360, window.innerHeight - 290);
     const scale = Math.min(availW / 1200, availH / 1600, 1);
     $("#scaler").style.transform = `scale(${scale})`;
     frame.style.width = `${1200 * scale}px`;
