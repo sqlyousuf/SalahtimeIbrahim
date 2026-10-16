@@ -2,101 +2,102 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Salah Times Studio · Masjid Ibrahim</title>
   <meta name="description" content="Update and share Masjid Ibrahim & KIC Musalla prayer timings." />
   <meta name="theme-color" content="#091547" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23091547'/%3E%3Cpath d='M32 14a10 10 0 1 0 8 16 12 12 0 1 1-8-16z' fill='%23e3c26f'/%3E%3C/svg%3E" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Salah Times" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23091547'/%3E%3Cpath d='M32 14a10 10 0 1 0 8 16 12 12 0 1 1-8-16z' fill='%23d9b866'/%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="assets/masjid-ibrahim-logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link crossorigin="anonymous" rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cinzel:wght@500;600;700&family=Marcellus&family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap" />
+    href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap" />
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
+<body class="view-edit">
   <header class="topbar">
     <div class="brand">
-      <div class="brand-mark">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a7 7 0 1 0 6 10.5A8.5 8.5 0 1 1 12 3z" fill="currentColor"/></svg>
-      </div>
+      <img class="brand-logo" src="assets/masjid-ibrahim-logo.png" alt="" />
       <div>
-        <div class="brand-title">Salah Times Studio</div>
+        <div class="brand-title">Salah Times</div>
         <div class="brand-sub">Masjid Ibrahim · Klein Islamic Center</div>
       </div>
     </div>
     <div class="top-actions">
-      <button class="btn ghost" id="resetBtn" title="Restore the default flyer">Reset</button>
-      <button class="btn ghost" id="shareBtn" title="Share via WhatsApp, Messages, etc.">
+      <button class="btn ghost" data-action="share">
         <svg viewBox="0 0 24 24"><path d="M18 8a3 3 0 1 0-2.8-4M6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm12 6a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8.6 13.5l6.8 4M15.4 6.5l-6.8 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         Share
       </button>
-      <button class="btn gold" id="downloadBtn">
+      <button class="btn gold" data-action="download">
         <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 19h16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Download<span class="lbl-long">&nbsp;Image</span>
+        Download Image
       </button>
     </div>
   </header>
 
   <main class="layout">
-    <!-- ============ EDITOR ============ -->
-    <aside class="editor" id="editor">
+    <!-- ============ PAGE 1 · EDIT ============ -->
+    <div class="editor" id="editor">
+      <div class="page-head">
+        <div class="eyebrow">Step 1 of 2</div>
+        <h1>Update timings</h1>
+      </div>
+
       <section class="card">
-        <div class="card-head"><span class="step">1</span><h2>Dates</h2></div>
         <div class="grid2">
-          <label class="field"><span>Start date</span><input type="date" data-k="startDate" /></label>
-          <label class="field"><span>End date</span><input type="date" data-k="endDate" /></label>
+          <label class="field"><span>From</span><input type="date" data-k="startDate" /></label>
+          <label class="field"><span>To</span><input type="date" data-k="endDate" /></label>
         </div>
-        <label class="field"><span>Custom date text <em>(optional — overrides the above)</em></span>
-          <input type="text" data-k="dateOverride" placeholder="e.g. STARTING NOVEMBER 2ND" />
-        </label>
+        <div class="hijri-line">
+          <span id="hijriText"></span>
+          <button class="link" id="hijriChange">Change</button>
+        </div>
       </section>
 
       <section class="card">
-        <div class="card-head"><span class="step">2</span><h2>Islamic Month</h2>
-          <button class="chip" id="autoHijri" title="Detect from the start date">Auto-detect</button>
+        <div class="tt-head"><span></span><span class="tl-a"></span><span class="tl-b"></span></div>
+        <div id="rows"></div>
+        <div class="tt-foot">
+          <span class="hint">Tap a time to change it</span>
+          <button class="link" id="addRow">+ Add prayer</button>
         </div>
-        <div class="grid2">
-          <label class="field"><span>Month</span><select data-k="hijriMonth" id="hijriSelect"></select></label>
+      </section>
+
+      <details class="card more" id="more">
+        <summary class="card-head"><h2>More options</h2><span class="sub">Announcement, month, addresses, logos</span><span class="chev">▾</span></summary>
+
+        <label class="field"><span>Announcement on the flyer <em>(optional)</em></span>
+          <input type="text" data-k="note" placeholder="e.g. Daylight saving ends Nov 1st" />
+        </label>
+
+        <div class="grid2 gap-top">
+          <label class="field"><span>Islamic month</span><select data-k="hijriMonth" id="hijriSelect"></select></label>
           <label class="field"><span>Hijri year</span><input type="text" inputmode="numeric" data-k="hijriYear" /></label>
         </div>
-      </section>
+        <label class="field gap-top"><span>Custom date text <em>(replaces the From/To dates)</em></span>
+          <input type="text" data-k="dateOverride" placeholder="e.g. Starting November 2nd" />
+        </label>
 
-      <section class="card">
-        <div class="card-head"><span class="step">3</span><h2>Prayer Timings</h2></div>
-        <div class="grid2">
+        <div class="grid2 gap-top">
           <label class="field"><span>Left column</span><input type="text" data-k="loc1Name" /></label>
           <label class="field"><span>Right column</span><input type="text" data-k="loc2Name" /></label>
-        </div>
-        <div class="times-head"><span>Prayer</span><span class="loc1-label"></span><span class="loc2-label"></span><span></span></div>
-        <div id="rows"></div>
-        <button class="btn add" id="addRow">+ Add row</button>
-        <p class="hint">Tip: type <b>6:45am</b> — it formats itself. Use <b>SUNSET</b> or <b>--</b> where needed.</p>
-      </section>
-
-      <section class="card">
-        <div class="card-head"><span class="step">4</span><h2>Announcement</h2></div>
-        <label class="field"><span>Note banner <em>(optional, shown above the footer)</em></span>
-          <input type="text" data-k="note" placeholder="e.g. Daylight saving ends Nov 1st — clocks go back 1 hour" />
-        </label>
-      </section>
-
-      <details class="card">
-        <summary class="card-head"><span class="step">5</span><h2>Addresses, Contact &amp; Logos</h2><span class="chev">▾</span></summary>
-        <div class="grid2">
-          <label class="field"><span>Location 1 name</span><input type="text" data-k="addr1Name" /></label>
-          <label class="field"><span>Location 2 name</span><input type="text" data-k="addr2Name" /></label>
+          <label class="field"><span>Location 1</span><input type="text" data-k="addr1Name" /></label>
+          <label class="field"><span>Location 2</span><input type="text" data-k="addr2Name" /></label>
           <label class="field"><span>Street</span><input type="text" data-k="addr1Street" /></label>
           <label class="field"><span>Street</span><input type="text" data-k="addr2Street" /></label>
           <label class="field"><span>City</span><input type="text" data-k="addr1City" /></label>
           <label class="field"><span>City</span><input type="text" data-k="addr2City" /></label>
-          <label class="field"><span>Text / phone</span><input type="text" data-k="phone" /></label>
-          <label class="field"><span>Email</span><input type="text" data-k="email" /></label>
+          <label class="field"><span>Text / phone</span><input type="tel" data-k="phone" /></label>
+          <label class="field"><span>Email</span><input type="email" data-k="email" /></label>
         </div>
-        <div class="grid2 logos">
+        <div class="grid2 gap-top">
           <div class="logo-up">
             <span>Masjid Ibrahim logo</span>
             <label class="btn ghost small">Upload<input type="file" accept="image/*" data-logo="logo1" hidden /></label>
-            <button class="link" data-clear="logo1">Use built-in</button>
+            <button class="link" data-clear="logo1">Use official logo</button>
           </div>
           <div class="logo-up">
             <span>KIC logo</span>
@@ -104,14 +105,19 @@
             <button class="link" data-clear="logo2">Use built-in</button>
           </div>
         </div>
+        <div class="reset-row"><button class="link" id="resetBtn">Reset everything to the original flyer</button></div>
       </details>
 
       <p class="saved" id="saved">All changes saved on this device</p>
-    </aside>
+    </div>
 
-    <!-- ============ PREVIEW ============ -->
-    <section class="stage">
-      <div class="stage-label">Live preview <span>1200 × 1600 · exports at 1800 × 2400</span></div>
+    <!-- ============ PAGE 2 · PREVIEW ============ -->
+    <section class="stage" id="stage">
+      <div class="page-head">
+        <div class="eyebrow">Step 2 of 2</div>
+        <h1>Preview &amp; send</h1>
+      </div>
+      <div class="stage-label">Live preview <span>Exports at 1800 × 2400</span></div>
       <div class="stage-frame" id="frame">
         <div class="scaler" id="scaler">
           <div class="flyer" id="flyer"></div>
@@ -119,6 +125,67 @@
       </div>
     </section>
   </main>
+
+  <!-- Phone bottom bar -->
+  <div class="actionbar">
+    <div class="ab ab-edit">
+      <button class="btn gold" data-go="preview">
+        Preview &amp; Share
+        <svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <div class="ab ab-preview">
+      <button class="btn ghost icon" data-go="edit" aria-label="Back to edit">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5m6-6-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="btn ghost" data-action="download">
+        <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 19h16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Save
+      </button>
+      <button class="btn gold" data-action="share">
+        <svg viewBox="0 0 24 24"><path d="M18 8a3 3 0 1 0-2.8-4M6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm12 6a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8.6 13.5l6.8 4M15.4 6.5l-6.8 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Share
+      </button>
+    </div>
+  </div>
+
+  <!-- Time picker sheet -->
+  <div class="sheet-wrap" id="sheet" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" data-mode="time">
+      <div class="grab"></div>
+      <div class="sheet-head">
+        <div>
+          <div class="sheet-title" id="sheetTitle"></div>
+          <div class="sheet-sub" id="sheetSub"></div>
+        </div>
+        <button class="sheet-x" id="sheetClose" aria-label="Close">×</button>
+      </div>
+
+      <div class="time-part">
+        <div class="sheet-time">
+          <button type="button" class="nudge" data-d="-5">−5<small>min</small></button>
+          <input type="time" id="sheetTime" step="300" aria-label="Time" />
+          <button type="button" class="nudge" data-d="5">+5<small>min</small></button>
+        </div>
+        <div class="chips">
+          <button type="button" data-set="SUNSET">Sunset</button>
+          <button type="button" data-set="--">None (--)</button>
+        </div>
+        <div class="sheet-actions">
+          <button type="button" class="btn ghost" id="sheetDone">Done</button>
+          <button type="button" class="btn gold" id="sheetNext">Next time →</button>
+        </div>
+      </div>
+
+      <div class="name-part">
+        <label class="field"><span>Prayer name</span><input type="text" id="sheetName" /></label>
+        <div class="sheet-actions">
+          <button type="button" class="btn danger" id="sheetRemove">Remove prayer</button>
+          <button type="button" class="btn gold" id="sheetNameDone">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="toast" id="toast"></div>
 

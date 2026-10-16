@@ -107,40 +107,45 @@
   }
 
   // ---------------------------------------------------------------- svgs
+  const GOLD = "#d9b866";
+
   const PATTERN_SVG = `
     <svg class="f-pattern" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <defs>
-        <pattern id="girih" width="120" height="120" patternUnits="userSpaceOnUse">
-          <g fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1.4">
-            <rect x="35" y="35" width="50" height="50"/>
-            <rect x="35" y="35" width="50" height="50" transform="rotate(45 60 60)"/>
-            <circle cx="60" cy="60" r="13"/>
-            <path d="M60 0V24.6M60 95.4V120M0 60H24.6M95.4 60H120M35 35L0 0M85 35L120 0M35 85L0 120M85 85L120 120"/>
+        <pattern id="girih" width="96" height="96" patternUnits="userSpaceOnUse">
+          <g fill="none" stroke="${GOLD}" stroke-opacity="0.12" stroke-width="1">
+            <rect x="28" y="28" width="40" height="40"/>
+            <rect x="28" y="28" width="40" height="40" transform="rotate(45 48 48)"/>
+            <circle cx="48" cy="48" r="9"/>
+            <path d="M48 0V19.7M48 76.3V96M0 48H19.7M76.3 48H96M28 28L0 0M68 28L96 0M28 68L0 96M68 68L96 96"/>
           </g>
         </pattern>
-        <radialGradient id="fade" cx="50%" cy="52%" r="60%">
-          <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
-          <stop offset="100%" stop-color="#fff" stop-opacity="0.25"/>
+        <radialGradient id="fade" cx="50%" cy="50%" r="72%">
+          <stop offset="45%" stop-color="#fff" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#fff" stop-opacity="1"/>
         </radialGradient>
         <mask id="m"><rect width="100%" height="100%" fill="url(#fade)"/></mask>
       </defs>
       <rect width="100%" height="100%" fill="url(#girih)" mask="url(#m)"/>
     </svg>`;
 
-  const STAR_SVG = `
-    <svg viewBox="0 0 40 40" aria-hidden="true">
-      <g fill="#e3c26f">
-        <rect x="10" y="10" width="20" height="20"/>
-        <rect x="10" y="10" width="20" height="20" transform="rotate(45 20 20)"/>
+  // Small eight-point star used at the frame corners and in dividers.
+  const star = (cls = "") => `
+    <svg class="${cls}" viewBox="0 0 40 40" aria-hidden="true">
+      <g fill="#091547" stroke="${GOLD}" stroke-width="1.6">
+        <rect x="9" y="9" width="22" height="22"/>
+        <rect x="9" y="9" width="22" height="22" transform="rotate(45 20 20)"/>
       </g>
-      <circle cx="20" cy="20" r="5" fill="#091547"/>
+      <rect x="15.5" y="15.5" width="9" height="9" fill="${GOLD}" transform="rotate(45 20 20)"/>
     </svg>`;
 
+  const rule = (cls = "") => `<div class="f-rule ${cls}"><i></i>${star()}<i></i></div>`;
+
   const BOOK_SVG = `
-    <svg viewBox="0 0 108 84" aria-hidden="true">
+    <svg class="book" viewBox="0 0 108 84" aria-hidden="true">
       <defs>
         <linearGradient id="bk" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#f1d58a"/><stop offset="1" stop-color="#b8913f"/>
+          <stop offset="0" stop-color="#f3dc9a"/><stop offset="1" stop-color="#b48a3c"/>
         </linearGradient>
       </defs>
       <path d="M54 14C42 5 22 3 6 7v68c16-4 36-2 48 7 12-9 32-11 48-7V7C86 3 66 5 54 14z" fill="url(#bk)"/>
@@ -151,63 +156,79 @@
       </g>
     </svg>`;
 
+  const ARABIC_NAMES = [
+    [/fajr|fajar/i, "الفجر"],
+    [/sunrise|shuruq/i, "الشروق"],
+    [/dhuhr|zuhr|duhr|thuhr/i, "الظهر"],
+    [/asr/i, "العصر"],
+    [/maghrib/i, "المغرب"],
+    [/isha/i, "العشاء"],
+    [/jum/i, "الجمعة"],
+    [/eid/i, "العيد"],
+    [/tara?we?e?h/i, "التراويح"],
+    [/tahajjud|qiyam/i, "قيام الليل"],
+  ];
+  const arabicFor = (name) => (ARABIC_NAMES.find(([re]) => re.test(name)) || [, ""])[1];
+
   // ---------------------------------------------------------------- flyer render
   function renderFlyer() {
     const month = HIJRI_MONTHS[state.hijriMonth] || HIJRI_MONTHS[0];
     const date = dateLabel();
 
     const logo1 = state.logo1
-      ? `<img src="${state.logo1}" alt="" />`
-      : `<div class="f-logo-builtin">
-           <img class="official" src="assets/masjid-ibrahim-logo.png" alt="Masjid Ibrahim" />
-           <div class="loc">SPRING, TEXAS</div>
-         </div>`;
+      ? `<img class="custom" src="${state.logo1}" alt="" />`
+      : `<img class="official" src="assets/masjid-ibrahim-logo.png" alt="Masjid Ibrahim" />
+         <div class="loc">SPRING · TEXAS</div>`;
 
     const logo2 = state.logo2
-      ? `<img src="${state.logo2}" alt="" />`
-      : `${BOOK_SVG}<div class="name">KLEIN ISLAMIC<br/>CENTER</div>`;
+      ? `<img class="custom" src="${state.logo2}" alt="" />`
+      : `${BOOK_SVG}<div class="name">KLEIN<br/>ISLAMIC CENTER</div>`;
 
     const rows = state.rows.map((r) => {
       const isJ = /jum/i.test(r.name);
-      const name = (r.name || "").toUpperCase();
-      const dimA = /^-+$/.test((r.a || "").trim()) ? " dim" : "";
-      const dimB = /^-+$/.test((r.b || "").trim()) ? " dim" : "";
+      const ar = arabicFor(r.name);
+      const kind = (v) => { v = (v || "").trim(); return /^-*$/.test(v) ? " dim" : /\d/.test(v) ? "" : " word"; };
+      const dimA = kind(r.a);
+      const dimB = kind(r.b);
       return `
         <div class="f-row${isJ ? " jumuah" : ""}">
           <div class="f-time${dimA}">${timeHtml(r.a)}</div>
-          <div class="f-name${name.length > 9 ? " long" : ""}">${esc(name)}</div>
+          <div class="f-name">
+            <div class="en f-fit">${esc((r.name || "").toUpperCase())}</div>
+            ${ar ? `<div class="ar" dir="rtl">${ar}</div>` : ""}
+          </div>
           <div class="f-time${dimB}">${timeHtml(r.b)}</div>
         </div>`;
     }).join("");
 
     $("#flyer").innerHTML = `
       ${PATTERN_SVG}
-      <div class="f-frame"></div>
+      <div class="f-frame">
+        ${star("c tl")}${star("c tr")}${star("c bl")}${star("c br")}
+      </div>
 
       <div class="f-header">
         <div class="f-logo">${logo1}</div>
         <div class="f-title">
+          <div class="f-eyebrow">Salah Timings</div>
           <div class="f-arabic f-fit">${month.ar}</div>
-          <div class="f-dates f-fit${date.long ? " long" : ""}">${date.html}</div>
-          <div class="f-hijri f-fit"><i></i>${esc(month.en.toUpperCase())} ${esc(state.hijriYear)}<i></i></div>
+          ${rule("short")}
+          <div class="f-dates f-fit">${date.html}</div>
+          <div class="f-hijri f-fit">${esc(month.en.toUpperCase())} &nbsp;·&nbsp; ${esc(state.hijriYear)} AH</div>
         </div>
         <div class="f-kic">${logo2}</div>
       </div>
 
-      <div class="f-divider"><i></i>${STAR_SVG}<i></i></div>
-
       <div class="f-table">
         <div class="f-cols">
-          <div>${esc(state.loc1Name)}</div>
-          <div class="mid">SALAH</div>
-          <div>${esc(state.loc2Name)}</div>
+          <div class="f-fit">${esc(state.loc1Name)}</div>
+          <div></div>
+          <div class="f-fit">${esc(state.loc2Name)}</div>
         </div>
         <div class="f-rows">${rows}</div>
       </div>
 
-      ${state.note.trim() ? `<div class="f-note">${esc(state.note.trim())}</div>` : ""}
-
-      <div class="f-divider bottom"><i></i>${STAR_SVG}<i></i></div>
+      ${state.note.trim() ? `<div class="f-note"><i></i><span class="f-fit">${esc(state.note.trim())}</span><i></i></div>` : ""}
 
       <div class="f-footer">
         <div class="f-addr">
@@ -216,7 +237,7 @@
           <div class="c">${esc(state.addr1City)}</div>
         </div>
         <div class="f-contact">
-          ${state.phone ? `<div><span class="lab">TEXT</span> · ${esc(state.phone)}</div>` : ""}
+          ${state.phone ? `<div class="lab">Text</div><div class="ph">${esc(state.phone)}</div>` : ""}
           ${state.email ? `<div class="em">${esc(state.email)}</div>` : ""}
         </div>
         <div class="f-addr right">
@@ -230,7 +251,7 @@
 
   // Shrink any single-line flyer text until it fits its box.
   function fitText() {
-    $$("#flyer .f-fit, #flyer .f-addr > div, #flyer .f-contact > div, #flyer .f-cols > div").forEach((el) => {
+    $$("#flyer .f-fit, #flyer .f-addr > div, #flyer .f-contact > div").forEach((el) => {
       el.style.fontSize = "";
       el.style.whiteSpace = "nowrap";
       let size = parseFloat(getComputedStyle(el).fontSize);
@@ -242,31 +263,154 @@
   }
 
   // ---------------------------------------------------------------- editor
+  // Every editable time cell in reading order, for the sheet's "Next" button.
+  const cellOrder = () => state.rows.flatMap((_, i) => [[i, "a"], [i, "b"]]);
+
+  function isChanged(i, f) {
+    const p = lastExport && lastExport.rows && lastExport.rows[i];
+    return !!p && p[f] !== state.rows[i][f];
+  }
+
+  function cellHtml(v) {
+    const s = String(v || "").trim();
+    if (/^-*$/.test(s)) return `<span class="none">—</span>`;
+    const m = /^(.+?)\s*(AM|PM)$/i.exec(s);
+    return m ? `${esc(m[1])}<small>${m[2].toUpperCase()}</small>` : `<span class="word">${esc(s.toUpperCase())}</span>`;
+  }
+
   function renderRows() {
-    const prev = lastExport && lastExport.rows;
-    $("#rows").innerHTML = state.rows.map((r, i) => {
-      const p = prev && prev[i];
-      const changed = p && (p.a !== r.a || p.b !== r.b);
-      return `
-        <div class="time-row${changed ? " changed" : ""}" data-i="${i}">
-          <input type="text" class="name" data-f="name" value="${esc(r.name)}" aria-label="Prayer name" />
-          <input type="text" class="t" data-f="a" value="${esc(r.a)}" aria-label="${esc(state.loc1Name)} time" />
-          <input type="text" class="t" data-f="b" value="${esc(r.b)}" aria-label="${esc(state.loc2Name)} time" />
-          <button class="del" title="Remove row" aria-label="Remove row">×</button>
-        </div>`;
-    }).join("");
-    $(".loc1-label").textContent = state.loc1Name;
-    $(".loc2-label").textContent = state.loc2Name;
+    $$(".tl-a").forEach((t) => (t.textContent = state.loc1Name));
+    $$(".tl-b").forEach((t) => (t.textContent = state.loc2Name));
+    $("#rows").innerHTML = state.rows.map((r, i) => `
+      <div class="tt-row" data-i="${i}">
+        <button type="button" class="tt-name">${esc(r.name || "Untitled")}</button>
+        <button type="button" class="cell${isChanged(i, "a") ? " changed" : ""}" data-f="a" aria-label="${esc(r.name)} at ${esc(state.loc1Name)}">${cellHtml(r.a)}</button>
+        <button type="button" class="cell${isChanged(i, "b") ? " changed" : ""}" data-f="b" aria-label="${esc(r.name)} at ${esc(state.loc2Name)}">${cellHtml(r.b)}</button>
+      </div>`).join("");
+    if (sheetAt) markActive();
+  }
+
+  function hijriFromDate(d) {
+    try {
+      const parts = new Intl.DateTimeFormat("en-US-u-ca-islamic-umalqura", { month: "numeric", year: "numeric" }).formatToParts(d);
+      return {
+        month: +parts.find((p) => p.type === "month").value - 1,
+        year: parts.find((p) => p.type === "year").value.replace(/\D/g, ""),
+      };
+    } catch { return null; }
+  }
+
+  function renderHijriLine() {
+    const m = HIJRI_MONTHS[state.hijriMonth] || HIJRI_MONTHS[0];
+    $("#hijriText").innerHTML = `<b>${esc(m.en)} ${esc(state.hijriYear)}</b> <span dir="rtl">${m.ar}</span>`;
   }
 
   function fillFields() {
     $$("[data-k]").forEach((el) => { el.value = state[el.dataset.k] ?? ""; });
     renderRows();
+    renderHijriLine();
+  }
+
+  // "6:45 PM" <-> "18:45" for the native time picker
+  function to24(v) {
+    const m = /^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i.exec(String(v || "").trim());
+    if (!m) return "";
+    let h = +m[1] % 12;
+    if ((m[3] || "").toUpperCase() === "PM") h += 12;
+    else if (!m[3] && +m[1] === 12) h = 12;
+    return `${String(h).padStart(2, "0")}:${m[2]}`;
+  }
+  function from24(v) {
+    const m = /^(\d{2}):(\d{2})/.exec(v || "");
+    if (!m) return "";
+    const h = +m[1];
+    return `${h % 12 || 12}:${m[2]} ${h >= 12 ? "PM" : "AM"}`;
+  }
+
+  // Move "6:45 AM" by delta minutes; returns null for non-times like SUNSET.
+  function shiftTime(v, delta) {
+    const t24 = to24(normalizeTime(v));
+    if (!t24) return null;
+    const [h, m] = t24.split(":").map(Number);
+    const t = (((h * 60 + m + delta) % 1440) + 1440) % 1440;
+    return from24(`${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`);
+  }
+
+  // ---- bottom sheet
+  let sheetAt = null; // [rowIndex, "a" | "b" | "name"]
+
+  function markActive() {
+    $$("#rows .active").forEach((el) => el.classList.remove("active"));
+    if (!sheetAt) return;
+    const [i, f] = sheetAt;
+    const row = $(`#rows .tt-row[data-i="${i}"]`);
+    const el = row && (f === "name" ? row.querySelector(".tt-name") : row.querySelector(`.cell[data-f="${f}"]`));
+    if (el) {
+      el.classList.add("active");
+      el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }
+
+  function syncSheet() {
+    const [i, f] = sheetAt;
+    const row = state.rows[i];
+    const sheet = $("#sheet .sheet");
+    sheet.dataset.mode = f === "name" ? "name" : "time";
+    $("#sheetTitle").textContent = row.name || "Prayer";
+    if (f === "name") {
+      $("#sheetSub").textContent = "Rename or remove this prayer";
+      $("#sheetName").value = row.name;
+      return;
+    }
+    $("#sheetSub").textContent = f === "a" ? state.loc1Name : state.loc2Name;
+    const v = String(row[f] || "").trim().toUpperCase();
+    $("#sheetTime").value = to24(v);
+    $("#sheet").classList.toggle("is-word", !to24(v));
+    $$("#sheet [data-set]").forEach((b) => b.classList.toggle("on", b.dataset.set === v || (b.dataset.set === "--" && /^-*$/.test(v))));
+    const order = cellOrder();
+    const k = order.findIndex(([ci, cf]) => ci === i && cf === f);
+    $("#sheetNext").textContent = k < order.length - 1 ? "Next time →" : "Finish ✓";
+  }
+
+  function openSheet(i, f) {
+    sheetAt = [i, f];
+    syncSheet();
+    markActive();
+    const wrap = $("#sheet");
+    wrap.hidden = false;
+    requestAnimationFrame(() => wrap.classList.add("open"));
+    if (f === "name") setTimeout(() => $("#sheetName").focus(), 250);
+  }
+
+  function closeSheet() {
+    const wrap = $("#sheet");
+    wrap.classList.remove("open");
+    sheetAt = null;
+    markActive();
+    setTimeout(() => { if (!sheetAt) wrap.hidden = true; }, 220);
+  }
+
+  function setCell(v) {
+    const [i, f] = sheetAt;
+    state.rows[i][f] = v;
+    renderRows();
+    syncSheet();
+    commit();
+  }
+
+  function nextCell() {
+    const order = cellOrder();
+    const k = order.findIndex(([i, f]) => i === sheetAt[0] && f === sheetAt[1]);
+    if (k < 0 || k >= order.length - 1) return closeSheet();
+    sheetAt = order[k + 1];
+    syncSheet();
+    markActive();
   }
 
   let saveTimer;
   function commit() {
     renderFlyer();
+    invalidateImage();
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
       const ok = save(STORE_KEY, state);
@@ -283,67 +427,80 @@
   }
 
   function initEditor() {
-    const sel = $("#hijriSelect");
-    sel.innerHTML = HIJRI_MONTHS.map((m, i) => `<option value="${i}">${m.en} — ${m.ar}</option>`).join("");
+    $("#hijriSelect").innerHTML = HIJRI_MONTHS.map((m, i) => `<option value="${i}">${m.en} — ${m.ar}</option>`).join("");
 
     $("#editor").addEventListener("input", (e) => {
       const el = e.target;
-      if (el.dataset.k) {
-        state[el.dataset.k] = el.dataset.k === "hijriMonth" ? +el.value : el.value;
-        if (el.dataset.k === "loc1Name" || el.dataset.k === "loc2Name") {
-          $(".loc1-label").textContent = state.loc1Name;
-          $(".loc2-label").textContent = state.loc2Name;
+      const k = el.dataset.k;
+      if (!k) return;
+      state[k] = k === "hijriMonth" ? +el.value : el.value;
+      if (k === "startDate") {
+        const h = parseDate(state.startDate) && hijriFromDate(parseDate(state.startDate));
+        if (h) {
+          state.hijriMonth = h.month;
+          state.hijriYear = h.year;
+          $("#hijriSelect").value = h.month;
+          $('[data-k="hijriYear"]').value = h.year;
         }
-        commit();
-      } else if (el.dataset.f) {
-        const i = +el.closest(".time-row").dataset.i;
-        state.rows[i][el.dataset.f] = el.value;
-        commit();
       }
+      if (k === "startDate" || k === "hijriMonth" || k === "hijriYear") renderHijriLine();
+      if (k === "loc1Name" || k === "loc2Name") renderRows();
+      commit();
     });
 
-    $("#rows").addEventListener("focusout", (e) => {
-      const el = e.target;
-      if (el.dataset.f === "a" || el.dataset.f === "b") {
-        const n = normalizeTime(el.value);
-        if (n !== el.value) {
-          el.value = n;
-          state.rows[+el.closest(".time-row").dataset.i][el.dataset.f] = n;
-          commit();
-        }
-      }
+    $("#hijriChange").addEventListener("click", () => {
+      $("#more").open = true;
+      $("#hijriSelect").scrollIntoView({ block: "center", behavior: "smooth" });
+      setTimeout(() => $("#hijriSelect").focus(), 350);
     });
 
     $("#rows").addEventListener("click", (e) => {
-      if (!e.target.classList.contains("del")) return;
-      const i = +e.target.closest(".time-row").dataset.i;
-      state.rows.splice(i, 1);
-      renderRows();
-      commit();
+      const btn = e.target.closest("button");
+      if (!btn) return;
+      const i = +btn.closest(".tt-row").dataset.i;
+      openSheet(i, btn.classList.contains("tt-name") ? "name" : btn.dataset.f);
     });
 
     $("#addRow").addEventListener("click", () => {
-      state.rows.push({ name: "", a: "", b: "" });
+      state.rows.push({ name: "New prayer", a: "", b: "--" });
       renderRows();
       commit();
-      $$("#rows .time-row:last-child input")[0].focus();
+      openSheet(state.rows.length - 1, "name");
     });
 
-    $("#autoHijri").addEventListener("click", () => {
-      const d = parseDate(state.startDate);
-      if (!d) return toast("Pick a start date first");
-      try {
-        const parts = new Intl.DateTimeFormat("en-US-u-ca-islamic-umalqura", { month: "numeric", year: "numeric" }).formatToParts(d);
-        const mo = +parts.find((p) => p.type === "month").value;
-        const yr = parts.find((p) => p.type === "year").value.replace(/\D/g, "");
-        state.hijriMonth = mo - 1;
-        state.hijriYear = yr;
-        fillFields();
-        commit();
-        toast(`Set to ${HIJRI_MONTHS[mo - 1].en} ${yr}`);
-      } catch {
-        toast("Your browser can't detect the Hijri date — pick it manually");
-      }
+    // sheet controls
+    $("#sheet").addEventListener("click", (e) => { if (e.target.id === "sheet") closeSheet(); });
+    $("#sheetClose").addEventListener("click", closeSheet);
+    $("#sheetDone").addEventListener("click", closeSheet);
+    $("#sheetNext").addEventListener("click", nextCell);
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && sheetAt) closeSheet(); });
+
+    const onTime = () => { const v = from24($("#sheetTime").value); if (v) setCell(v); };
+    $("#sheetTime").addEventListener("input", onTime);
+    $("#sheetTime").addEventListener("change", onTime);
+
+    $$("#sheet .nudge").forEach((b) => b.addEventListener("click", () => {
+      const [i, f] = sheetAt;
+      const next = shiftTime(state.rows[i][f], +b.dataset.d);
+      if (!next) return toast("Pick a time first");
+      setCell(next);
+    }));
+    $$("#sheet [data-set]").forEach((b) => b.addEventListener("click", () => setCell(b.dataset.set)));
+
+    $("#sheetName").addEventListener("input", (e) => {
+      state.rows[sheetAt[0]].name = e.target.value;
+      $("#sheetTitle").textContent = e.target.value || "Prayer";
+      renderRows();
+      commit();
+    });
+    $("#sheetNameDone").addEventListener("click", closeSheet);
+    $("#sheetRemove").addEventListener("click", () => {
+      const i = sheetAt[0];
+      if (!confirm(`Remove "${state.rows[i].name || "this prayer"}" from the flyer?`)) return;
+      closeSheet();
+      state.rows.splice(i, 1);
+      renderRows();
+      commit();
     });
 
     $$("[data-logo]").forEach((inp) => {
@@ -396,6 +553,7 @@
     const frame = $("#frame");
     const stage = frame.parentElement;
     const availW = stage.clientWidth;
+    if (!availW) return;
     const availH = window.innerWidth > 980 ? window.innerHeight - 150 : Infinity;
     const scale = Math.min(availW / 1200, availH / 1600, 1);
     $("#scaler").style.transform = `scale(${scale})`;
@@ -405,6 +563,30 @@
 
   // ---------------------------------------------------------------- export
   let fontCSS = null;
+  let cached = null;      // { blob } for the current state
+  let pending = null;     // in-flight render promise
+  let prerenderTimer;
+
+  // Build the image in the background after edits, so Share can open
+  // instantly (iOS rejects a share that starts too long after the tap).
+  function invalidateImage() {
+    cached = null;
+    pending = null;
+    clearTimeout(prerenderTimer);
+    prerenderTimer = setTimeout(() => getBlob().catch(() => {}), 1500);
+  }
+
+  function getBlob() {
+    if (cached) return Promise.resolve(cached.blob);
+    if (pending) return pending;
+    const p = makeBlob().then((blob) => {
+      if (pending === p) cached = { blob };
+      return blob;
+    }).finally(() => { if (pending === p) pending = null; });
+    pending = p;
+    return p;
+  }
+
   async function makeBlob() {
     const node = $("#flyer");
     await document.fonts.ready;
@@ -443,34 +625,52 @@
     }
   }
 
-  function initExport() {
-    $("#downloadBtn").addEventListener("click", (e) => withBusy(e.currentTarget, "Preparing…", async () => {
-      const blob = await makeBlob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = fileName();
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 4000);
-      markExported();
-      toast("Image downloaded ✓");
-    }));
+  function downloadBlob(blob) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName();
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
 
-    $("#shareBtn").addEventListener("click", (e) => withBusy(e.currentTarget, "Preparing…", async () => {
-      const blob = await makeBlob();
-      const file = new File([blob], fileName(), { type: "image/png" });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], title: "Updated Salah Times" });
-          markExported();
-        } catch (err) {
-          if (err.name !== "AbortError") throw err;
-        }
-      } else {
-        toast("Sharing isn't supported here — use Download instead");
-      }
+  async function share() {
+    const ready = !!cached;
+    const blob = await getBlob();
+    const file = new File([blob], fileName(), { type: "image/png" });
+    if (!(navigator.canShare && navigator.canShare({ files: [file] }))) {
+      downloadBlob(blob);
+      markExported();
+      return toast("Image saved — attach it in WhatsApp");
+    }
+    try {
+      await navigator.share({ files: [file] });
+      markExported();
+    } catch (err) {
+      if (err.name === "AbortError") return;
+      if (!ready && err.name === "NotAllowedError") return toast("Image ready — tap Share again");
+      throw err;
+    }
+  }
+
+  function initExport() {
+    $$('[data-action="download"]').forEach((b) => b.addEventListener("click", () => withBusy(b, "Preparing…", async () => {
+      downloadBlob(await getBlob());
+      markExported();
+      toast("Image saved ✓");
+    })));
+    $$('[data-action="share"]').forEach((b) => b.addEventListener("click", () => withBusy(b, "Preparing…", share)));
+  }
+
+  function initViews() {
+    $$("[data-go]").forEach((btn) => btn.addEventListener("click", () => {
+      const v = btn.dataset.go;
+      document.body.classList.toggle("view-edit", v === "edit");
+      document.body.classList.toggle("view-preview", v === "preview");
+      window.scrollTo({ top: 0 });
+      fitPreview();
     }));
   }
 
@@ -479,7 +679,9 @@
   fillFields();
   renderFlyer();
   initExport();
+  initViews();
   fitPreview();
+  invalidateImage();
   window.addEventListener("resize", fitPreview);
   document.fonts && document.fonts.ready.then(() => { fitText(); fitPreview(); });
 })();
