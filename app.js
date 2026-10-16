@@ -347,9 +347,119 @@
     $$("[data-adj]").forEach((b) => b.classList.toggle("on", +b.dataset.adj === (+state.hijriAdjust || 0)));
   }
 
+  // ---- date range: one calendar, tap the first day then the last day
+  const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const shortDate = (s) => { const d = parseDate(s); return d ? `${SHORT_MONTHS[d.getMonth()]} ${d.getDate()}` : ""; };
+  let cal = null; // { y, m, start, end, picking: "start" | "end" }
+
+  function renderDateBtn() {
+    const a = parseDate(state.startDate), b = parseDate(state.endDate);
+    let txt = "Tap to choose dates";
+    if (a && b) txt = `${shortDate(state.startDate)} – ${shortDate(state.endDate)}, ${b.getFullYear()}`;
+    else if (a) txt = `From ${shortDate(state.startDate)}, ${a.getFullYear()}`;
+    $("#dateVal").textContent = txt;
+  }
+
+  function renderCal() {
+    const { y, m, start, end } = cal;
+    const name = MONTHS[m];
+    $("#calMonth").textContent = `${name[0]}${name.slice(1).toLowerCase()} ${y}`;
+    const lead = new Date(y, m, 1).getDay();
+    const days = new Date(y, m + 1, 0).getDate();
+    const today = iso(new Date());
+    let html = ["S", "M", "T", "W", "T", "F", "S"].map((d) => `<span class="dow">${d}</span>`).join("");
+    html += "<span></span>".repeat(lead);
+    for (let d = 1; d <= days; d++) {
+      const k = iso(new Date(y, m, d));
+      const cls = [
+        k === start && "start",
+        k === end && "end",
+        start && end && k > start && k < end && "mid",
+        k === today && "today",
+      ].filter(Boolean).join(" ");
+      html += `<button type="button" class="day ${cls}" data-day="${k}">${d}</button>`;
+    }
+    $("#calGrid").innerHTML = html;
+    $("#dsHint").textContent = cal.picking === "start"
+      ? "Tap the first day"
+      : `From ${shortDate(start)} — now tap the last day`;
+  }
+
+  function applyDates(start, end) {
+    state.startDate = start;
+    state.endDate = end;
+    renderDateBtn();
+    renderHijriLine();
+    commit();
+  }
+
+  function openDates() {
+    const a = parseDate(state.startDate) || new Date();
+    cal = { y: a.getFullYear(), m: a.getMonth(), start: state.startDate || "", end: state.endDate || "", picking: "start" };
+    renderCal();
+    const wrap = $("#dateSheet");
+    wrap.hidden = false;
+    requestAnimationFrame(() => wrap.classList.add("open"));
+  }
+
+  function closeDates() {
+    const wrap = $("#dateSheet");
+    wrap.classList.remove("open");
+    cal = null;
+    setTimeout(() => { if (!cal) wrap.hidden = true; }, 220);
+  }
+
+  function initDates() {
+    $("#dateBtn").addEventListener("click", openDates);
+    $("#dsClose").addEventListener("click", closeDates);
+    $("#dateSheet").addEventListener("click", (e) => { if (e.target.id === "dateSheet") closeDates(); });
+    $("#calPrev").addEventListener("click", () => { cal.m--; if (cal.m < 0) { cal.m = 11; cal.y--; } renderCal(); });
+    $("#calNext").addEventListener("click", () => { cal.m++; if (cal.m > 11) { cal.m = 0; cal.y++; } renderCal(); });
+
+    $("#calGrid").addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-day]");
+      if (!btn) return;
+      const k = btn.dataset.day;
+      if (cal.picking === "start" || k < cal.start) {
+        cal.start = k;
+        cal.end = "";
+        cal.picking = "end";
+        renderCal();
+        return;
+      }
+      cal.end = k;
+      renderCal();
+      applyDates(cal.start, cal.end);
+      setTimeout(closeDates, 350);
+    });
+
+    $$("[data-preset]").forEach((b) => b.addEventListener("click", () => {
+      const last = new Date(cal.y, cal.m + 1, 0).getDate();
+      const [from, to] = { first: [1, 15], second: [16, last], month: [1, last] }[b.dataset.preset];
+      cal.start = iso(new Date(cal.y, cal.m, from));
+      cal.end = iso(new Date(cal.y, cal.m, to));
+      renderCal();
+      applyDates(cal.start, cal.end);
+      setTimeout(closeDates, 350);
+    }));
+
+    $("#dsClear").addEventListener("click", () => {
+      cal.start = cal.end = "";
+      cal.picking = "start";
+      renderCal();
+    });
+    $("#dsDone").addEventListener("click", () => {
+      if (cal.start) applyDates(cal.start, cal.end);
+      closeDates();
+    });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && cal) closeDates(); });
+  }
+
   function fillFields() {
     $$("[data-k]").forEach((el) => { el.value = state[el.dataset.k] ?? ""; });
     renderRows();
+    renderDateBtn();
     renderHijriLine();
   }
 
@@ -707,6 +817,7 @@
 
   // ---------------------------------------------------------------- boot
   initEditor();
+  initDates();
   fillFields();
   renderFlyer();
   initExport();
